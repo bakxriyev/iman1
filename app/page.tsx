@@ -287,55 +287,7 @@ const CourseLanding = () => {
               </h2>
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white text-black rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
-                  <div className="mb-6 h-48 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
-                    <Image
-                      src="./royhat.webp"
-                      alt="Dars materiallari"
-                      width={300}
-                      height={200}
-                      className="object-cover w-full h-full"
-                      loading="lazy"
-                    />
-                  </div>
-                  <p className="font-bold text-lg leading-relaxed">
-                    Xotira va miyani to'liq potensialini ochib berishga yordam beradigan 7 haftalik darslar
-                  </p>
-                </div>
-
-                <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
-                  <div className="mb-6 h-48 bg-red-700 rounded-xl flex items-center justify-center overflow-hidden">
-                    <Image
-                      src="/tarif.webp"
-                      alt="Bonus"
-                      width={300}
-                      height={200}
-                      className="object-cover w-full h-full"
-                      loading="lazy"
-                    />
-                  </div>
-                  <p className="font-bold text-lg leading-relaxed">
-                    Eslab qolish bo'yicha champion kuratorlar nazorati
-                  </p>
-                </div>
-
-                <div className="bg-white text-black rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
-                  <div className="mb-6 h-48 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
-                    <Image
-                      src="/live.webp"
-                      alt="Amaliy mashqlar"
-                      width={300}
-                      height={200}
-                      className="object-cover w-full h-full"
-                      loading="lazy"
-                    />
-                  </div>
-                  <p className="font-bold text-lg leading-relaxed">
-                    Iman Akhmedovna bilan 8+ jonli efirlar va amaliy mashqlar
-                  </p>
-                </div>
-
-                <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                 <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
                   <div className="mb-6 h-48 bg-white rounded-xl flex items-center justify-center">
                     <Image
                       src="/iphonee.png"
@@ -350,9 +302,88 @@ const CourseLanding = () => {
                     iPhone 17 telefoni yutib olish imkoniyati va boshqa sovrinlar
                   </p>
                 </div>
+                
+
+                <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                  <div className="mb-6 h-48 bg-red-700 rounded-xl flex items-center justify-center overflow-hidden">
+                    <Image
+                      src="/tarif.webp"
+                      alt="Bonus"
+                      width={300}
+                      height={200}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="font-bold text-[15px] leading-relaxed">
+                    Narhi 1 millionlik qarzdorlik, kambag’allikdan halos bo’lib, hotirjamlikda yashashingizga sabab bo’ladigan TAHAJJUDGA OSHIQLAR kursi mutlaqo bepul bonusga olish
+                  </p>
+                </div>
+
+                <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                  <div className="mb-6 h-48 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
+                    <Image
+                      src="/royhat.webp"
+                      alt="Amaliy mashqlar"
+                      width={300}
+                      height={200}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="font-bold text-[15px] leading-relaxed">
+                    Narhi 2 millionlik HUZUR kursi. Har bir oilada bitta psixolog bo’lsin shiori ostida ochilgan kurs, har qanday muammolar kelib chiqish ildizini topib, uni yechimini qilish o’rgatilgan.
+                  </p>
+                </div>
+
+                <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                  <div className="mb-6 h-48 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
+                    <Image
+                      src="./live.webp"
+                      alt="Dars materiallari"
+                      width={300}
+                      height={200}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="font-bold text-lg leading-relaxed">
+                    Bepul konsultatsiya yutib olish imkoniyati
+                  </p>
+                </div>
+                <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                  <div className="mb-6 h-48 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
+                    <Image
+                      src="./chegirma.jpg"
+                      alt="Dars materiallari"
+                      width={300}
+                      height={200}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="font-bold text-lg leading-relaxed">
+                    Keyingi kurslarga 50% lik chegirma
+                  </p>
+                </div>
+                <div className="bg-red-600 text-white rounded-2xl p-8 hover:shadow-2xl transition-all transform hover:scale-105">
+                  <div className="mb-6 h-48 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
+                    <Image
+                      src="./royhat.webp"
+                      alt="Dars materiallari"
+                      width={300}
+                      height={200}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="font-bold text-lg leading-relaxed">
+                    Narhi 2 millionlik Nikoh madaniyati kursini yutib olish imkoniyatini
+                  </p>
+                </div>
               </div>
 
-              <div className="bg-black/70 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-yellow-400/30">
+              {/* <div className="bg-black/70 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-yellow-400/30">
                 <h3 className="text-2xl font-bold text-yellow-400 mb-6">Qo'shimcha bonuslar:</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-gray-300">
                   <div className="flex items-start gap-3">
@@ -376,7 +407,7 @@ const CourseLanding = () => {
                     <p>Narhi 2 millionlik "Nikoh madaniyati" kursini yutib olish</p>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="text-center">
                 <RegisterButton onClick={() => setIsModalOpen(true)} />
@@ -390,30 +421,27 @@ const CourseLanding = () => {
           <section className="py-12 px-4">
             <div className="max-w-6xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-black text-center mb-5">Iman Akhmedovna</h2>
-              <p className="text-center text-yellow-400 font-bold text-lg mb-8">
-                Oliy ma'lumotli Psixolog va Psixoterapevt
-              </p>
-
+              
               <div className="space-y-3 max-w-3xl mx-auto mb-8">
                 <div className="bg-black/70 backdrop-blur-sm border-2 border-white rounded-2xl px-6 py-3 hover:border-yellow-400 transition-colors duration-300">
-                  <p className="text-white font-semibold">3 yillik tajribaga ega Oliy ma'lumotli Psixolog</p>
+                  <p className="text-white font-semibold">3 yillik tajribaga ega Oliy ma’lumotli Psixolog, psixoterapevt</p>
                 </div>
                 <div className="bg-black/70 backdrop-blur-sm border-2 border-yellow-400 rounded-2xl px-6 py-3">
                   <p className="text-white font-semibold">
-                    65,000 dan ortiq ayol qizlarga muammolariga tez va oson yechim topib bergan
+                    65.000 dan ortiq ayol qizlarga muammolariga tez,  oson va yengil yechimini topib berish bo’yicha O’zbekistonda yagona ekspert
                   </p>
                 </div>
                 <div className="bg-black/70 backdrop-blur-sm border-2 border-white rounded-2xl px-6 py-3 hover:border-yellow-400 transition-colors duration-300">
                   <p className="text-white font-semibold">
-                    O'zbekistonda yagona ekspert - muammolarga oson yechim topish
+                    Shaxsiy rivojlanish bo’yicha mentor
                   </p>
                 </div>
                 <div className="bg-black/70 backdrop-blur-sm border-2 border-yellow-400 rounded-2xl px-6 py-3">
-                  <p className="text-white font-semibold">Shaxsiy rivojlanish bo'yicha mentor</p>
+                  <p className="text-white font-semibold">100 dan ortiq shogirdlarga muammolarga oson va yengil yechimini topish sirlarini o’rgatgan ekspert</p>
                 </div>
                 <div className="bg-black/70 backdrop-blur-sm border-2 border-white rounded-2xl px-6 py-3 hover:border-yellow-400 transition-colors duration-300">
                   <p className="text-white font-semibold">
-                    100 dan ortiq shogirdlarga muammolarga oson yechimini topish sirlarini o'rgatgan
+                    Bizni o’quvchilar eng tezlikda natijaga chiqish bo’yicha O’zbekistonda rekord o’rnatishmoqda
                   </p>
                 </div>
               </div>
