@@ -185,16 +185,18 @@ const CourseLanding = () => {
     <div
       className="min-h-screen text-white overflow-x-hidden"
       style={{
-        backgroundImage: "url('./background.webp')",
+        backgroundImage: "url('/bg.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         backgroundAttachment: "fixed",
+        backgroundColor: "#1a1a1a",
       }}
     >
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.8) 100%)",
+          background: "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.4) 100%)",
         }}
       />
 
@@ -434,18 +436,18 @@ const CourseLanding = () => {
             </div>
 
             <footer className="w-full py-6 mt-6 relative z-10">
-        <div className="flex items-center justify-center gap-3">
-          <p className="text-gray-500 text-sm">Created by</p>
-          <a
-            href="https://t.me/it_zoneuz"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-80 transition-opacity duration-300 transform hover:scale-105"
-          >
-            <Image src="/itzone.png" alt="IT Zone Telegram" width={150} height={100} className="cursor-pointer" />
-          </a>
-        </div>
-      </footer>
+              <div className="flex items-center justify-center gap-3">
+                <p className="text-gray-500 text-sm">Created by</p>
+                <a
+                  href="https://t.me/it_zoneuz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity duration-300 transform hover:scale-105"
+                >
+                  <Image src="/itzone.png" alt="IT Zone Telegram" width={150} height={100} className="cursor-pointer" />
+                </a>
+              </div>
+            </footer>
           </section>
         </ScrollAnimation>
 
