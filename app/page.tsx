@@ -227,7 +227,7 @@ const CourseLanding = () => {
             <div className="max-w-6xl mx-auto text-center">
               <div className="border-2 border-white rounded-full px-6 py-2 inline-block bg-black/50 backdrop-blur-sm hover:border-yellow-400 transition-colors duration-300 mb-4">
                 <p className="text-white font-black text-base md:text-lg">
-                  Kurs boshlanish sanasi : <span className="font-black">25-26 Oktyabr</span>
+                  Kurs boshlanish sanasi : <span className="font-black">25 - Oktyabr</span>
                 </p>
               </div>
 
@@ -442,7 +442,7 @@ const CourseLanding = () => {
             rel="noopener noreferrer"
             className="hover:opacity-80 transition-opacity duration-300 transform hover:scale-105"
           >
-            <Image src="./itzone.png" alt="IT Zone Telegram" width={150} height={100} className="cursor-pointer" />
+            <Image src="/itzone.png" alt="IT Zone Telegram" width={150} height={100} className="cursor-pointer" />
           </a>
         </div>
       </footer>

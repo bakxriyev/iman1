@@ -7,9 +7,9 @@ const geist = Geist({ subsets: ["latin"] })
 const geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SUPERMIYA AI 2.0 - Kurs",
-  description: "Eslab qilish bo'yicha Rossiya rekordchisi bilan xotirangizni 10 baravarga kuchaytiring",
-  generator: "v0.app",
+  title: "OZODSAN - Kurs",
+  description: "Iphone 17 telefoni yutib olish imkoniyati",
+  generator: "ITZONE",
 }
 
 export default function RootLayout({
