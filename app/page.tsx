@@ -206,11 +206,11 @@ const CourseLanding = () => {
       />
 
       {/* Content */}
-      <div className="relative z-10 text-white">
+      <div className="relative z-6 text-white">
         {/* Countdown Header */}
-        <section className="bg-yellow-400 text-black py-3 px-4 shadow-2xl sticky top-0 z-50">
+        <section className="bg-yellow-400 text-black py-2 px-2 shadow-2xl sticky top-0 z-50">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-base md:text-lg font-black mb-1.5 drop-shadow-lg">Kurs boshlanishiga qoldi:</h2>
+            <h2 className="text-base md:text-lg font-black -mb-1 drop-shadow-lg">Kurs boshlanishiga qoldi:</h2>
             <div className="flex justify-center items-center gap-2 md:gap-3">
               {[
                 { value: timeLeft.days, label: "kun" },
@@ -239,11 +239,11 @@ const CourseLanding = () => {
                 </p>
               </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-2 leading-tight text-white drop-shadow-lg">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black -mb-2 leading-tight text-white drop-shadow-lg">
                 OZODSAN
               </h1>
 
-              <p className="text-[15px] md:text-base text-gray-100 leading-relaxed font-bold max-w-6xl mx-auto mb-0 rounded-xl px-6 py-3">
+              <p className="text-[15px] md:text-base  text-gray-100 leading-relaxed font-bold max-w-6xl mx-auto mb-0 rounded-xl px-6 py-3">
                 Muammolar oson va yengil yechimini topish bo'yicha oliy ma'lumotli psixolog bilan 2 kun ichida
                 o'zingizni ayblayverishdan halos bo'lib, orzularni amalga oshiruvchi praktika bilan hayotingizni{" "}
                 <span className="text-yellow-400 font-black text-lg">10x</span> ga transformatsiya qilishni boshlaysiz.
@@ -254,7 +254,7 @@ const CourseLanding = () => {
 
         {/* Image and Button Section */}
         <ScrollAnimation>
-          <div className="px-4 -mt-55">
+          <div className="px-0 -mt-45">
             <div className="max-w-2xl mx-auto">
               <div className="relative">
                 <div className="relative overflow-hidden shadow-2xl rounded-2xl">
