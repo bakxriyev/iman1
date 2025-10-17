@@ -189,7 +189,7 @@ const CourseLanding = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
+        backgroundAttachment: "scroll",
         backgroundColor: "#1a1a1a",
       }}
     >
