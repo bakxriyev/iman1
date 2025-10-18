@@ -21,7 +21,13 @@ export default function RootLayout({
   return (
     <html lang="uz">
       <head>
-        {/* ✅ Facebook Pixel scripti */}
+        {/* ✅ Facebook Domain Verification */}
+        <meta
+          name="facebook-domain-verification"
+          content="hpct7lrt1w4te4dit3npe8gd2tq81w"
+        />
+
+        {/* ✅ Facebook Pixel Script */}
         <Script id="facebook-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -37,7 +43,7 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* ✅ Noscript versiyasi */}
+        {/* ✅ Noscript versiyasi (fallback) */}
         <noscript>
           <img
             height="1"
@@ -48,6 +54,7 @@ export default function RootLayout({
           />
         </noscript>
       </head>
+
       <body className={`${geist.className} antialiased bg-[#1a1a1a]`}>
         {children}
       </body>
