@@ -244,9 +244,9 @@ const CourseLanding = () => {
               </h1>
 
               <p className="text-[15px] md:text-base  text-gray-100 leading-relaxed font-bold max-w-6xl mx-auto mb-0 rounded-xl px-6 py-3">
-                Muammolar oson va yengil yechimini topish bo'yicha oliy ma'lumotli psixolog bilan 2 kun ichida
-                o'zingizni ayblayverishdan halos bo'lib, orzularni amalga oshiruvchi praktika bilan hayotingizni{" "}
-                <span className="text-yellow-400 font-black text-lg">10x</span> ga transformatsiya qilishni boshlaysiz.
+                Muammolarning oson va yengil yechimini topish bo'yicha oliy ma'lumotli psixolog bilan 2 kun ichida
+               o'zingizni ayblayverishdan xalos bo'lib, orzularni amalga oshiruvchi praktika orqali hayotingizni{" "}
+                <span className="text-yellow-400 font-black text-lg">10x</span> ga transformatsiya qilishni boshlaysiz..
               </p>
             </div>
           </section>
