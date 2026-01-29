@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { full_name, phone_number, timestamp } = body
+    const { full_name, phone_number } = body
 
     // Validate input
     if (!full_name || !phone_number) {
