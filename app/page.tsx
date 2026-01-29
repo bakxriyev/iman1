@@ -59,7 +59,7 @@ const GoldButton = ({ onClick, text = "Ro'yxatdan o'tish", className = "", disab
 
 const SupermiyaLanding = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [formData, setFormData] = useState({ full_name: "", phone_number: "" })
+  const [formData, setFormData] = useState({ full_name: "", phone_number: "",address:"a" })
   const [isLoading, setIsLoading] = useState(false)
 
   const BACKEND_API_URL = "https://b.imanakhmedovna.uz/users"
@@ -113,14 +113,15 @@ const SupermiyaLanding = () => {
         body: JSON.stringify({
           full_name: formData.full_name,
           phone_number: formData.phone_number,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          address:"a"
         })
       }).catch(err => {
         console.error('Backend yuborishda xatolik:', err)
       })
 
       setIsModalOpen(false)
-      setFormData({ full_name: "", phone_number: "" })
+      setFormData({ full_name: "", phone_number: "",address:"a" })
       
       setTimeout(() => {
         const telegramUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${encodeURIComponent(formData.phone_number)}`
