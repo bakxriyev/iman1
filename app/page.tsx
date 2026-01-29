@@ -68,7 +68,7 @@ const SupermiyaLanding = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   // BACKEND API URL - Bu yerni o'z backend URLingizga o'zgartiring
-  const BACKEND_API_URL = "https://b.imanakhmedovna.uz/user"
+  const BACKEND_API_URL = "https://b.imanakhmedovna.uz/users"
   
   // TELEGRAM BOT USERNAME - Bu yerni o'z bot usernameingizga o'zgartiring (@ belgisiz)
   const TELEGRAM_BOT_USERNAME = "ImanAkhmedovna_bot"
