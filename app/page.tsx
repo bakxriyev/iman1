@@ -1,27 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useMemo, useRef, useEffect } from "react"
 import Image from "next/image"
-
-
-const CurvedArrow = () => (
-  <svg 
-    width="40" 
-    height="40" 
-    viewBox="12 12 60 41" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-    className="absolute -right-2 -bottom-8 md:-right-8 md:-bottom-2 transform rotate-0 md:rotate-0 opacity-80"
-  >
-    <path 
-      d="M39.6953 10.9575C39.6953 10.9575 23.3276 27.6432 10.5186 52.8988M39.6953 10.9575C32.1281 12.0287 18.043 12.3524 18.043 12.3524M39.6953 10.9575C41.3537 17.653 41.5367 31.7946 41.5367 31.7946" 
-      stroke="#9CA3AF" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-  </svg>
-)
 
 // Oltin 3D Tugma
 const GoldButton = ({ onClick, text = "Ro'yxatdan o'tish", className = "", disabled = false }: { 
@@ -57,87 +37,166 @@ const GoldButton = ({ onClick, text = "Ro'yxatdan o'tish", className = "", disab
   </div>
 )
 
+// Mamlakatlar ro'yxati
+const COUNTRIES = [
+  { code: '998', name: 'Oʻzbekiston', flag: '🇺🇿', maxLength: 9 },
+  { code: '7', name: 'Rossiya', flag: '🇷🇺', maxLength: 10 },
+  { code: '1', name: 'AQSH/Kanada', flag: '🇺🇸', maxLength: 10 },
+  { code: '44', name: 'Birlashgan Qirollik', flag: '🇬🇧', maxLength: 10 },
+  { code: '49', name: 'Germaniya', flag: '🇩🇪', maxLength: 11 },
+  { code: '33', name: 'Fransiya', flag: '🇫🇷', maxLength: 9 },
+  { code: '90', name: 'Turkiya', flag: '🇹🇷', maxLength: 10 },
+  { code: '971', name: 'BAA', flag: '🇦🇪', maxLength: 9 },
+  { code: '82', name: 'Koreya', flag: '🇰🇷', maxLength: 9 },
+  { code: '81', name: 'Yaponiya', flag: '🇯🇵', maxLength: 9 },
+  { code: '86', name: 'Xitoy', flag: '🇨🇳', maxLength: 11 },
+  { code: '91', name: 'Hindiston', flag: '🇮🇳', maxLength: 10 },
+  { code: '62', name: 'Indoneziya', flag: '🇮🇩', maxLength: 11 },
+  { code: '966', name: 'Saudiya Arabistoni', flag: '🇸🇦', maxLength: 9 },
+  { code: '380', name: 'Ukraina', flag: '🇺🇦', maxLength: 9 },
+  { code: '77', name: 'Qozogʻiston', flag: '🇰🇿', maxLength: 9 },
+];
+
 const SupermiyaLanding = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [formData, setFormData] = useState({ full_name: "", phone_number: "",address:"a" })
+  const [formData, setFormData] = useState({ 
+    full_name: "", 
+    phone_number: "", 
+    country_code: "998",
+    address: "a" 
+  })
   const [isLoading, setIsLoading] = useState(false)
+  const [phoneInput, setPhoneInput] = useState("")
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false)
+  
+  const nameInputRef = useRef<HTMLInputElement>(null)
+  const phoneInputRef = useRef<HTMLInputElement>(null)
+  const countryButtonRef = useRef<HTMLButtonElement>(null)
 
   const BACKEND_API_URL = "https://b.imanakhmedovna.uz/users"
   const TELEGRAM_BOT_USERNAME = "ImanAkhmedovna_bot"
 
+  // Modal ochilganda ism inputiga focus
+  useEffect(() => {
+    if (isModalOpen) {
+      setTimeout(() => {
+        nameInputRef.current?.focus()
+      }, 50)
+    }
+  }, [isModalOpen])
+
+  // Telefon inputiga focus qaytarish
+  const focusPhoneInput = () => {
+    setTimeout(() => {
+      if (phoneInputRef.current) {
+        phoneInputRef.current.focus()
+        const len = phoneInputRef.current.value.length
+        phoneInputRef.current.setSelectionRange(len, len)
+      }
+    }, 10)
+  }
+
+  // Tanlangan mamlakatni topish
+  const selectedCountry = useMemo(() => {
+    return COUNTRIES.find(country => country.code === formData.country_code) || COUNTRIES[0];
+  }, [formData.country_code]);
+
+  // Ism o'zgartirish
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      full_name: e.target.value 
+    }))
+  }
+
+  // Telefon raqamini o'zgartirish - SODDA VERSIYA
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "")
+    let value = e.target.value
     
-    if (!value.startsWith('998')) {
-      if (value.length > 0) {
-        value = '998' + value
-      }
+    // Faqat raqamlar
+    value = value.replace(/\D/g, '')
+    
+    // Maksimal uzunlik
+    const maxLength = selectedCountry.maxLength
+    if (value.length > maxLength) {
+      value = value.slice(0, maxLength)
     }
     
-    if (value.length > 12) {
-      value = value.slice(0, 12)
-    }
+    setPhoneInput(value)
     
-    let displayValue = ''
-    if (value.length > 0) {
-      displayValue = '+' + value.slice(0, 3)
-      if (value.length > 3) {
-        displayValue += ' ' + value.slice(3, 5)
-      }
-      if (value.length > 5) {
-        displayValue += ' ' + value.slice(5, 8)
-      }
-      if (value.length > 8) {
-        displayValue += ' ' + value.slice(8, 12)
-      }
-    }
+    // Backend uchun to'liq raqam
+    setFormData(prev => ({ 
+      ...prev, 
+      phone_number: formData.country_code + value
+    }))
+  }
+
+  // Mamlakat o'zgarganda
+  const handleCountryChange = (countryCode: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      country_code: countryCode,
+      phone_number: countryCode + phoneInput
+    }))
     
-    setFormData({ 
-      ...formData, 
-      phone_number: value
-    })
-    
-    e.target.value = displayValue
+    setIsCountryDropdownOpen(false)
+    focusPhoneInput()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validatsiya
+    if (!formData.full_name.trim()) {
+      alert("Iltimos, ismingizni kiriting")
+      nameInputRef.current?.focus()
+      return
+    }
+    
+    if (!phoneInput || phoneInput.length < 5) {
+      alert("Iltimos, to'liq telefon raqamini kiriting")
+      focusPhoneInput()
+      return
+    }
+    
     setIsLoading(true)
 
     try {
-      const submitPromise = fetch(BACKEND_API_URL, {
+      // Backendga yuborish
+      const response = await fetch(BACKEND_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           full_name: formData.full_name,
-          phone_number: formData.phone_number,
-          timestamp: new Date().toISOString(),
-          address:"a"
+          phone_number: `+${formData.country_code}${phoneInput}`,
+          address: "a"
         })
-      }).catch(err => {
-        console.error('Backend yuborishda xatolik:', err)
       })
 
+      if (!response.ok) {
+        throw new Error(`HTTP xatolik: ${response.status}`)
+      }
+
+      // Modalni yopish va formani tozalash
       setIsModalOpen(false)
-      setFormData({ full_name: "", phone_number: "",address:"a" })
-      
-      setTimeout(() => {
-        const telegramUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${encodeURIComponent(formData.phone_number)}`
-        window.open(telegramUrl, '_blank')
-        setIsLoading(false)
-      }, 100)
-
-      submitPromise.then(() => {
-        console.log('Ma\'lumotlar backendga muvaffaqiyatli yuborildi')
+      setFormData({ 
+        full_name: "", 
+        phone_number: "", 
+        country_code: "998",
+        address: "a" 
       })
+      setPhoneInput("")
+      setIsLoading(false)
+      
+      // Telegramga ochish
+      window.open(`https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`, '_blank')
 
     } catch (error) {
       console.error('Xatolik:', error)
       setIsLoading(false)
-      const telegramUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${encodeURIComponent(formData.phone_number)}`
-      window.open(telegramUrl, '_blank')
+      window.open(`https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`, '_blank')
       setIsModalOpen(false)
     }
   }
@@ -145,48 +204,39 @@ const SupermiyaLanding = () => {
   return (
     <div className="min-h-screen bg-[#050505] font-sans text-white overflow-x-hidden selection:bg-amber-500 selection:text-black relative">
       
-      {/* CRITICAL CSS - Inline for instant paint */}
       <style dangerouslySetInnerHTML={{ __html: `
-        @font-face {
-          font-family: 'system-ui';
-          font-display: swap;
-        }
-        
-        /* Critical above-the-fold styles */
         body {
           margin: 0;
           padding: 0;
           background: #050505;
           font-family: system-ui, -apple-system, sans-serif;
         }
-        
-        /* Prevent layout shift */
-        .hero-skeleton {
-          min-height: 100vh;
-          background: linear-gradient(to bottom, #0a0a0a, #050505, #000000);
+        .country-dropdown::-webkit-scrollbar {
+          width: 8px;
         }
-        
-        /* Optimize font loading */
-        .text-render-optimize {
-          text-rendering: optimizeSpeed;
-          -webkit-font-smoothing: antialiased;
+        .country-dropdown::-webkit-scrollbar-track {
+          background: #2A2A2A;
+          border-radius: 4px;
+        }
+        .country-dropdown::-webkit-scrollbar-thumb {
+          background: #FFB800;
+          border-radius: 4px;
         }
       `}} />
 
-      {/* GRADIENT BACKGROUND - Static, no animations */}
+      {/* Background gradient */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#050505] to-[#000000]" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/15 via-amber-950/8 to-transparent blur-3xl" />
         <div className="absolute top-[35%] left-1/2 -translate-x-1/2 w-[90%] h-[50%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-700/12 via-transparent to-transparent blur-[120px]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[40%] bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-900/10 via-transparent to-transparent blur-3xl" />
       </div>
 
-      {/* ==================== SECTION 1: HERO ==================== */}
+      {/* SECTION 1: HERO */}
       <section className="relative pt-6 pb-0 px-4 flex flex-col items-center justify-start overflow-hidden min-h-screen z-10">
         
         <div className="relative z-10 max-w-2xl w-full text-center flex flex-col items-center">
             
-            {/* Profil - Lazy load */}
+            {/* Profil */}
             <div className="flex items-center gap-2 mb-3 bg-black/70 backdrop-blur-xl px-4 py-2 rounded-full border border-amber-800/60 shadow-[0_0_25px_rgba(251,191,36,0.15)]">
                 <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-amber-500/80 shadow-lg bg-amber-900/20">
                       <Image 
@@ -202,7 +252,7 @@ const SupermiyaLanding = () => {
                 <span className="text-sm font-bold text-amber-50 tracking-wide">iimaan_akhmedovna</span>
             </div>
 
-            {/* Sarlavha - No image, pure CSS */}
+            {/* Sarlavha */}
             <h1 className="text-[68px] leading-[0.85] md:text-[96px] font-[900] uppercase tracking-[-0.02em] mb-2 text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-300 to-amber-500 drop-shadow-[0_4px_20px_rgba(255,193,7,0.4)]">
                 HUZUR
             </h1>
@@ -212,7 +262,7 @@ const SupermiyaLanding = () => {
                 Qanday qilib muammolardan halos bo'lib, orzu va maqsadlarga 8 ta yo'l orqali <span className="text-amber-300 font-extrabold">TEZ</span> va <span className="text-amber-300 font-extrabold">OSON</span> yetish mumkin?
             </p>
 
-            {/* Rasm - Priority for LCP */}
+            {/* Asosiy rasm */}
             <div className="relative w-full max-w-[550px] h-[650px] -mt-26 -mb-20 z-10 group">
               
               <div 
@@ -250,7 +300,7 @@ const SupermiyaLanding = () => {
         </div>
       </section>
 
-      {/* SECTION 2 - Lazy load all images */}
+      {/* SECTION 2 */}
       <section className="relative py-16 -mt-20 px-4 z-10">
         <div className="max-w-md mx-auto">
             <h2 className="text-[32px] font-[900] text-center mb-10 leading-[1.1] tracking-tight">
@@ -352,7 +402,7 @@ const SupermiyaLanding = () => {
         </div>
       </section>
 
-      {/* ==================== SECTION 3: MENTOR ==================== */}
+      {/* SECTION 3: MENTOR */}
       <section className="relative pt-10 pb-16 -mt-12 px-4 z-10">
         <div className="max-w-md mx-auto flex flex-col items-center">
             
@@ -377,7 +427,7 @@ const SupermiyaLanding = () => {
                 ))}
             </div>
 
-            {/* Pastki rasm - Lazy load */}
+            {/* Pastki rasm */}
             <div className="relative -mt-10 w-full max-w-[900px] aspect-square mb-8 rounded-b-3xl overflow-hidden bg-[#0a0a0a]">
                  <Image
                     src="/iman.png"
@@ -401,52 +451,120 @@ const SupermiyaLanding = () => {
         </div>
       </section>
 
-      {/* ==================== MODAL ==================== */}
+      {/* MODAL - TO'G'RI ISHLAYDI */}
       {isModalOpen && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
-          onClick={() => setIsModalOpen(false)}
+          onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
         >
           <div 
-            className="bg-[#121212] border border-[#333] rounded-[32px] p-6 md:p-8 max-w-sm w-full shadow-[0_0_50px_rgba(255,184,0,0.15)] relative"
+            className="bg-[#121212] border border-[#333] rounded-[32px] p-6 md:p-8 max-w-md w-full shadow-[0_0_50px_rgba(255,184,0,0.15)] relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button 
-                className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-2xl"
-                onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors text-2xl"
+              onClick={() => setIsModalOpen(false)}
             >
-                &times;
+              &times;
             </button>
             
             <h3 className="text-2xl font-[900] text-white text-center mb-6 uppercase tracking-tight">
-                Ro'yxatdan o'tish
+              Ro'yxatdan o'tish
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-gray-400 text-xs font-bold uppercase mb-2 ml-2 tracking-wider">Ism va Familiya</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full h-14 px-5 bg-[#1E1E1E] border border-[#333] rounded-[16px] focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] focus:outline-none text-white placeholder-gray-600 font-medium transition-all"
-                  placeholder="Ismingizni kiriting"
-                  disabled={isLoading}
-                />
-              </div>
+              {/* Ism familiya */}
+              <input
+                ref={nameInputRef}
+                type="text"
+                required
+                value={formData.full_name}
+                onChange={handleNameChange}
+                className="w-full h-14 px-5 bg-[#1E1E1E] border border-[#333] rounded-[16px] focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800] focus:outline-none text-white placeholder-gray-600 font-medium transition-all"
+                placeholder="Ismingizni kiriting"
+                disabled={isLoading}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    focusPhoneInput()
+                  }
+                }}
+              />
 
-              <div>
-                <label className="block text-gray-400 text-xs font-bold uppercase mb-2 ml-2 tracking-wider">Telefon raqami</label>
-                <input
-                  type="tel"
-                  required
-                  value={formData.phone_number.length > 0 ? '+' + formData.phone_number.slice(0, 3) + (formData.phone_number.length > 3 ? ' ' + formData.phone_number.slice(3, 5) : '') + (formData.phone_number.length > 5 ? ' ' + formData.phone_number.slice(5, 8) : '') + (formData.phone_number.length > 8 ? ' ' + formData.phone_number.slice(8, 12) : '') : ''}
-                  onChange={handlePhoneChange}
-                  className="w-full h-14 px-5 bg-[#1E1E1E] border border-[#333] rounded-[16px] focus:border-[#FFB800] focus:ring-1 focus:ring-[#FFB800] focus:outline-none text-white placeholder-gray-600 font-mono text-lg transition-all"
-                  placeholder="+998"
-                  disabled={isLoading}
-                />
+              {/* Telefon raqami */}
+              <div className="relative">
+                <div className="flex gap-2">
+                  {/* Mamlakat tanlovi */}
+                  <div className="relative w-1/3">
+                    <button
+                      type="button"
+                      onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                      className="w-full h-14 px-3 bg-[#1E1E1E] border border-[#333] rounded-[16px] flex items-center justify-between hover:border-[#FFB800] transition-all text-white"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{selectedCountry.flag}</span>
+                        <span className="font-medium">+{selectedCountry.code}</span>
+                      </div>
+                      <span className="text-gray-400">▼</span>
+                    </button>
+                    
+                    {isCountryDropdownOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => {
+                            setIsCountryDropdownOpen(false)
+                            focusPhoneInput()
+                          }}
+                        />
+                        <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-[#1E1E1E] border border-[#333] rounded-[16px] z-20 shadow-lg">
+                          {COUNTRIES.map((country) => (
+                            <button
+                              key={country.code}
+                              type="button"
+                              onClick={() => handleCountryChange(country.code)}
+                              className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-[#2A2A2A] transition-colors ${
+                                formData.country_code === country.code ? 'bg-[#FFB800]/20' : ''
+                              }`}
+                            >
+                              <span className="text-lg">{country.flag}</span>
+                              <div className="flex flex-col items-start">
+                                <span className="text-white font-medium">+{country.code}</span>
+                                <span className="text-gray-400 text-xs">{country.name}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* Telefon raqami inputi */}
+                  <div className="flex-1">
+                    <input
+                      ref={phoneInputRef}
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      required
+                      value={phoneInput}
+                      onChange={handlePhoneChange}
+                      className="w-full h-14 px-5 bg-[#1E1E1E] border border-[#333] rounded-[16px] focus:border-[#FFB800] focus:ring-2 focus:ring-[#FFB800] focus:outline-none text-white placeholder-gray-600 font-mono text-lg transition-all"
+                      placeholder="Raqamingiz"
+                      disabled={isLoading}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleSubmit(e as any)
+                        }
+                      }}
+                      onFocus={(e) => {
+                        const len = e.target.value.length
+                        e.target.setSelectionRange(len, len)
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="pt-4">
