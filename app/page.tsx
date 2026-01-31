@@ -75,6 +75,7 @@ const SupermiyaLanding = () => {
 
   const BACKEND_API_URL = "https://b.imanakhmedovna.uz/users"
   const TELEGRAM_BOT_USERNAME = "ImanAkhmedovna_bot"
+  const BACKEND_TIMEOUT = 2000; // 2 soniya
 
   // Modal ochilganda ism inputiga focus
   useEffect(() => {
@@ -161,44 +162,67 @@ const SupermiyaLanding = () => {
     
     setIsLoading(true)
 
-    try {
-      // Backendga yuborish
-      const response = await fetch(BACKEND_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+    // 1. DARROV Telegram botga o'tish (ASOSIY QISMI)
+    const telegramUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`;
+    const telegramWindow = window.open(telegramUrl, '_blank', 'noopener,noreferrer');
+
+    // 2. Backendga ma'lumot yuborish (ORQA FONDA)
+    const sendToBackend = async () => {
+      try {
+        // Timeout bilan so'rov yuboramiz
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), BACKEND_TIMEOUT)
+        );
+
+        const userData = {
           full_name: formData.full_name,
           phone_number: `+${formData.country_code}${phoneInput}`,
           address: "a"
-        })
-      })
+        };
 
-      if (!response.ok) {
-        throw new Error(`HTTP xatolik: ${response.status}`)
+        const fetchPromise = fetch(BACKEND_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(userData),
+        });
+
+        // Faqat 2 soniya kutamiz, keyin davom etamiz
+        await Promise.race([fetchPromise, timeoutPromise]);
+        
+        // Agar vaqt ichida javob kelsa
+        const response = await fetchPromise;
+        if (response.ok) {
+          console.log('Ma\'lumotlar backendga muvaffaqiyatli yuborildi');
+        }
+      } catch (error) {
+        // Xato bo'lsa ham, hech narsa qilmaymiz (konsolga yozamiz)
+        console.log('Backend xatosi (bu foydalanuvchi uchun muhim emas):', error);
       }
+    };
 
-      // Modalni yopish va formani tozalash
-      setIsModalOpen(false)
+    // Backendga yuborishni parallel bajarish
+    sendToBackend();
+
+    // 3. Formani tozalash va modalni yopish
+    setTimeout(() => {
       setFormData({ 
         full_name: "", 
         phone_number: "", 
         country_code: "998",
         address: "a" 
-      })
-      setPhoneInput("")
-      setIsLoading(false)
+      });
+      setPhoneInput("");
+      setIsLoading(false);
+      setIsModalOpen(false);
       
-      // Telegramga ochish
-      window.open(`https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`, '_blank')
-
-    } catch (error) {
-      console.error('Xatolik:', error)
-      setIsLoading(false)
-      window.open(`https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`, '_blank')
-      setIsModalOpen(false)
-    }
+      // Telegram oynasiga focus qilish (agar foydalanuvchi uni yopmagan bo'lsa)
+      if (telegramWindow && !telegramWindow.closed) {
+        telegramWindow.focus();
+      }
+    }, 300);
   }
 
   return (
@@ -570,9 +594,10 @@ const SupermiyaLanding = () => {
               <div className="pt-4">
                 <GoldButton 
                   onClick={() => {}} 
-                  text={isLoading ? "Yuborilmoqda..." : "Tasdiqlash"} 
+                  text={isLoading ? "Telegramga o'tilmoqda..." : "Tasdiqlash"} 
                   disabled={isLoading}
                 />
+               
               </div>
             </form>
           </div>
