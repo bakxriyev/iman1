@@ -73,7 +73,7 @@ const SupermiyaLanding = () => {
   const phoneInputRef = useRef<HTMLInputElement>(null)
   const countryButtonRef = useRef<HTMLButtonElement>(null)
 
-  const BACKEND_API_URL = "https://b.imanakhmedovna.uz/users"
+  const BACKEND_API_URL = "https://b.kardioclinic.uz//userscha"
   const TELEGRAM_BOT_USERNAME = "ImanAkhmedovna_bot"
   const BACKEND_TIMEOUT = 2000; // 2 soniya
 
