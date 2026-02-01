@@ -325,7 +325,7 @@ const SupermiyaLanding = () => {
       </section>
 
       {/* SECTION 2 */}
-      <section className="relative py-16 -mt-20 px-4 z-10">
+      <section className="relative py-16 -mt-12 px-4 z-10">
         <div className="max-w-md mx-auto">
             <h2 className="text-[32px] font-[900] text-center mb-10 leading-[1.1] tracking-tight">
                 Ro'yxatdan o'tish <br/>
