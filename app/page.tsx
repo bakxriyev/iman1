@@ -355,7 +355,7 @@ const SupermiyaLanding = () => {
                 <div className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
                     <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
                           <Image 
-                            src="/tarif.webp" 
+                            src="/chegirma.jpg" 
                             alt="Arzon narx" 
                             fill 
                             className="object-contain" 
@@ -373,7 +373,7 @@ const SupermiyaLanding = () => {
                 <div className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
                     <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
                           <Image 
-                            src="/number.webp" 
+                            src="/problem.png" 
                             alt="Xotira" 
                             fill 
                             className="object-contain" 
