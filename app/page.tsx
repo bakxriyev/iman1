@@ -57,13 +57,17 @@ const COUNTRIES = [
   { code: '77', name: 'Qozogʻiston', flag: '🇰🇿', maxLength: 9 },
 ];
 
+// ✅ CRM API — local Next.js route orqali
+const BACKEND_API_URL = "/api/register"
+const TELEGRAM_BOT_USERNAME = "iman_ahmedovnaa_bot"
+const BACKEND_TIMEOUT = 5000 // 5 soniya
+
 const SupermiyaLanding = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formData, setFormData] = useState({ 
     full_name: "", 
-    phone_number: "", 
+    phone_number: "",
     country_code: "998",
-    address: "a" 
   })
   const [isLoading, setIsLoading] = useState(false)
   const [phoneInput, setPhoneInput] = useState("")
@@ -71,11 +75,6 @@ const SupermiyaLanding = () => {
   
   const nameInputRef = useRef<HTMLInputElement>(null)
   const phoneInputRef = useRef<HTMLInputElement>(null)
-  const countryButtonRef = useRef<HTMLButtonElement>(null)
-
-  const BACKEND_API_URL = "https://b.kardioclinic.uz/userscha"
-  const TELEGRAM_BOT_USERNAME = "iman_ahmedovnaa_bot"
-  const BACKEND_TIMEOUT = 2000; // 2 soniya
 
   // Modal ochilganda ism inputiga focus
   useEffect(() => {
@@ -99,8 +98,8 @@ const SupermiyaLanding = () => {
 
   // Tanlangan mamlakatni topish
   const selectedCountry = useMemo(() => {
-    return COUNTRIES.find(country => country.code === formData.country_code) || COUNTRIES[0];
-  }, [formData.country_code]);
+    return COUNTRIES.find(country => country.code === formData.country_code) || COUNTRIES[0]
+  }, [formData.country_code])
 
   // Ism o'zgartirish
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,25 +109,18 @@ const SupermiyaLanding = () => {
     }))
   }
 
-  // Telefon raqamini o'zgartirish - SODDA VERSIYA
+  // Telefon raqamini o'zgartirish
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value
-    
-    // Faqat raqamlar
     value = value.replace(/\D/g, '')
-    
-    // Maksimal uzunlik
     const maxLength = selectedCountry.maxLength
     if (value.length > maxLength) {
       value = value.slice(0, maxLength)
     }
-    
     setPhoneInput(value)
-    
-    // Backend uchun to'liq raqam
     setFormData(prev => ({ 
       ...prev, 
-      phone_number: formData.country_code + value
+      phone_number: `+${formData.country_code}${value}`
     }))
   }
 
@@ -137,9 +129,8 @@ const SupermiyaLanding = () => {
     setFormData(prev => ({ 
       ...prev, 
       country_code: countryCode,
-      phone_number: countryCode + phoneInput
+      phone_number: `+${countryCode}${phoneInput}`
     }))
-    
     setIsCountryDropdownOpen(false)
     focusPhoneInput()
   }
@@ -147,7 +138,6 @@ const SupermiyaLanding = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validatsiya
     if (!formData.full_name.trim()) {
       alert("Iltimos, ismingizni kiriting")
       nameInputRef.current?.focus()
@@ -162,67 +152,65 @@ const SupermiyaLanding = () => {
     
     setIsLoading(true)
 
-    // 1. DARROV Telegram botga o'tish (ASOSIY QISMI)
-    const telegramUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`;
-    const telegramWindow = window.open(telegramUrl, '_blank', 'noopener,noreferrer');
+    // ✅ To'liq telefon raqami +998XXXXXXXXX formatida
+    const fullPhone = `+${formData.country_code}${phoneInput}`
 
-    // 2. Backendga ma'lumot yuborish (ORQA FONDA)
-    const sendToBackend = async () => {
+    // 1. CRM ga yuborish (ASOSIY)
+    const sendToCRM = async () => {
       try {
-        // Timeout bilan so'rov yuboramiz
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise<never>((_, reject) => 
           setTimeout(() => reject(new Error('Timeout')), BACKEND_TIMEOUT)
-        );
+        )
 
-        const userData = {
-          full_name: formData.full_name,
-          phone_number: `+${formData.country_code}${phoneInput}`,
-          address: "a"
-        };
-
+        // ✅ Field nomlar: full_name va phone_number — route.ts ichida CRM formatiga o'giriladi
         const fetchPromise = fetch(BACKEND_API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
           },
-          body: JSON.stringify(userData),
-        });
+          body: JSON.stringify({
+            full_name: formData.full_name.trim(),
+            phone_number: fullPhone,
+          }),
+        })
 
-        // Faqat 2 soniya kutamiz, keyin davom etamiz
-        await Promise.race([fetchPromise, timeoutPromise]);
-        
-        // Agar vaqt ichida javob kelsa
-        const response = await fetchPromise;
+        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
+
         if (response.ok) {
-          console.log('Ma\'lumotlar backendga muvaffaqiyatli yuborildi');
+          const data = await response.json()
+          console.log('✅ CRM ga muvaffaqiyatli yuborildi:', data)
+        } else {
+          const errData = await response.json().catch(() => null)
+          console.error('❌ CRM xatosi:', response.status, errData)
         }
       } catch (error) {
-        // Xato bo'lsa ham, hech narsa qilmaymiz (konsolga yozamiz)
-        console.log('Backend xatosi (bu foydalanuvchi uchun muhim emas):', error);
+        console.error('❌ Yuborishda xato (foydalanuvchiga ta\'sir qilmaydi):', error)
       }
-    };
+    }
 
-    // Backendga yuborishni parallel bajarish
-    sendToBackend();
+    // 2. Telegram botga o'tish
+    const telegramUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`
+    const telegramWindow = window.open(telegramUrl, '_blank', 'noopener,noreferrer')
 
-    // 3. Formani tozalash va modalni yopish
+    // 3. CRM ga parallel yuborish
+    sendToCRM()
+
+    // 4. Formani tozalash
     setTimeout(() => {
       setFormData({ 
         full_name: "", 
-        phone_number: "", 
+        phone_number: "",
         country_code: "998",
-        address: "a" 
-      });
-      setPhoneInput("");
-      setIsLoading(false);
-      setIsModalOpen(false);
+      })
+      setPhoneInput("")
+      setIsLoading(false)
+      setIsModalOpen(false)
       
-      // Telegram oynasiga focus qilish (agar foydalanuvchi uni yopmagan bo'lsa)
       if (telegramWindow && !telegramWindow.closed) {
-        telegramWindow.focus();
+        telegramWindow.focus()
       }
-    }, 300);
+    }, 300)
   }
 
   return (
@@ -475,7 +463,7 @@ const SupermiyaLanding = () => {
         </div>
       </section>
 
-      {/* MODAL - TO'G'RI ISHLAYDI */}
+      {/* MODAL */}
       {isModalOpen && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
@@ -541,7 +529,7 @@ const SupermiyaLanding = () => {
                             focusPhoneInput()
                           }}
                         />
-                        <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-[#1E1E1E] border border-[#333] rounded-[16px] z-20 shadow-lg">
+                        <div className="country-dropdown absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-[#1E1E1E] border border-[#333] rounded-[16px] z-20 shadow-lg">
                           {COUNTRIES.map((country) => (
                             <button
                               key={country.code}
@@ -579,7 +567,7 @@ const SupermiyaLanding = () => {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault()
-                          handleSubmit(e as any)
+                          handleSubmit(e as unknown as React.FormEvent)
                         }
                       }}
                       onFocus={(e) => {
@@ -597,7 +585,6 @@ const SupermiyaLanding = () => {
                   text={isLoading ? "Telegramga o'tilmoqda..." : "Tasdiqlash"} 
                   disabled={isLoading}
                 />
-               
               </div>
             </form>
           </div>
