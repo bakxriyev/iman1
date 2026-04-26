@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 // Oltin 3D Tugma
 const GoldButton = ({ onClick, text = "Ro'yxatdan o'tish", className = "", disabled = false }: { 
@@ -57,12 +58,12 @@ const COUNTRIES = [
   { code: '77', name: 'Qozogʻiston', flag: '🇰🇿', maxLength: 9 },
 ];
 
-// ✅ CRM API — local Next.js route orqali
 const BACKEND_API_URL = "/api/register"
 const TELEGRAM_BOT_USERNAME = "iman_ahmedovnaa_bot"
-const BACKEND_TIMEOUT = 5000 // 5 soniya
+const BACKEND_TIMEOUT = 5000
 
 const SupermiyaLanding = () => {
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formData, setFormData] = useState({ 
     full_name: "", 
@@ -76,7 +77,6 @@ const SupermiyaLanding = () => {
   const nameInputRef = useRef<HTMLInputElement>(null)
   const phoneInputRef = useRef<HTMLInputElement>(null)
 
-  // Modal ochilganda ism inputiga focus
   useEffect(() => {
     if (isModalOpen) {
       setTimeout(() => {
@@ -85,7 +85,6 @@ const SupermiyaLanding = () => {
     }
   }, [isModalOpen])
 
-  // Telefon inputiga focus qaytarish
   const focusPhoneInput = () => {
     setTimeout(() => {
       if (phoneInputRef.current) {
@@ -96,27 +95,18 @@ const SupermiyaLanding = () => {
     }, 10)
   }
 
-  // Tanlangan mamlakatni topish
   const selectedCountry = useMemo(() => {
     return COUNTRIES.find(country => country.code === formData.country_code) || COUNTRIES[0]
   }, [formData.country_code])
 
-  // Ism o'zgartirish
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      full_name: e.target.value 
-    }))
+    setFormData(prev => ({ ...prev, full_name: e.target.value }))
   }
 
-  // Telefon raqamini o'zgartirish
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value
-    value = value.replace(/\D/g, '')
+    let value = e.target.value.replace(/\D/g, '')
     const maxLength = selectedCountry.maxLength
-    if (value.length > maxLength) {
-      value = value.slice(0, maxLength)
-    }
+    if (value.length > maxLength) value = value.slice(0, maxLength)
     setPhoneInput(value)
     setFormData(prev => ({ 
       ...prev, 
@@ -124,7 +114,6 @@ const SupermiyaLanding = () => {
     }))
   }
 
-  // Mamlakat o'zgarganda
   const handleCountryChange = (countryCode: string) => {
     setFormData(prev => ({ 
       ...prev, 
@@ -152,65 +141,49 @@ const SupermiyaLanding = () => {
     
     setIsLoading(true)
 
-    // ✅ To'liq telefon raqami +998XXXXXXXXX formatida
     const fullPhone = `+${formData.country_code}${phoneInput}`
 
-    // 1. CRM ga yuborish (ASOSIY)
-    const sendToCRM = async () => {
-      try {
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), BACKEND_TIMEOUT)
-        )
+    try {
+      // 1. Backend API ga yuborish (await qilamiz)
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), BACKEND_TIMEOUT)
+      )
 
-        // ✅ Field nomlar: full_name va phone_number — route.ts ichida CRM formatiga o'giriladi
-        const fetchPromise = fetch(BACKEND_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            full_name: formData.full_name.trim(),
-            phone_number: fullPhone,
-          }),
-        })
-
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
-
-        if (response.ok) {
-          const data = await response.json()
-          console.log('✅ CRM ga muvaffaqiyatli yuborildi:', data)
-        } else {
-          const errData = await response.json().catch(() => null)
-          console.error('❌ CRM xatosi:', response.status, errData)
-        }
-      } catch (error) {
-        console.error('❌ Yuborishda xato (foydalanuvchiga ta\'sir qilmaydi):', error)
-      }
-    }
-
-    // 2. Telegram botga o'tish
-    const telegramUrl = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=site2`
-    const telegramWindow = window.open(telegramUrl, '_blank', 'noopener,noreferrer')
-
-    // 3. CRM ga parallel yuborish
-    sendToCRM()
-
-    // 4. Formani tozalash
-    setTimeout(() => {
-      setFormData({ 
-        full_name: "", 
-        phone_number: "",
-        country_code: "998",
+      const fetchPromise = fetch(BACKEND_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          full_name: formData.full_name.trim(),
+          phone_number: fullPhone,
+        }),
       })
+
+      // Backend javobini kutamiz (xato bo'lsa ham davom etamiz)
+      await Promise.race([fetchPromise, timeoutPromise]).catch((err) => {
+        console.error('❌ Backend xatosi (davom etilmoqda):', err)
+      })
+
+  
+ router.push('/thank-you')
+ 
+      // 3. Formani tozalash
+      setFormData({ full_name: "", phone_number: "", country_code: "998" })
       setPhoneInput("")
-      setIsLoading(false)
       setIsModalOpen(false)
-      
-      if (telegramWindow && !telegramWindow.closed) {
-        telegramWindow.focus()
-      }
-    }, 300)
+
+      // 4. /thank-you sahifasiga redirect
+      router.push('/thank-you')
+
+    } catch (error) {
+      console.error('💥 Kutilmagan xato:', error)
+      // Xato bo'lsa ham thank-you ga yuboramiz
+      router.push('/thank-you')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -223,17 +196,9 @@ const SupermiyaLanding = () => {
           background: #050505;
           font-family: system-ui, -apple-system, sans-serif;
         }
-        .country-dropdown::-webkit-scrollbar {
-          width: 8px;
-        }
-        .country-dropdown::-webkit-scrollbar-track {
-          background: #2A2A2A;
-          border-radius: 4px;
-        }
-        .country-dropdown::-webkit-scrollbar-thumb {
-          background: #FFB800;
-          border-radius: 4px;
-        }
+        .country-dropdown::-webkit-scrollbar { width: 8px; }
+        .country-dropdown::-webkit-scrollbar-track { background: #2A2A2A; border-radius: 4px; }
+        .country-dropdown::-webkit-scrollbar-thumb { background: #FFB800; border-radius: 4px; }
       `}} />
 
       {/* Background gradient */}
@@ -245,221 +210,110 @@ const SupermiyaLanding = () => {
 
       {/* SECTION 1: HERO */}
       <section className="relative pt-6 pb-0 px-4 flex flex-col items-center justify-start overflow-hidden min-h-screen z-10">
-        
         <div className="relative z-10 max-w-2xl w-full text-center flex flex-col items-center">
             
-            {/* Profil */}
-            <div className="flex items-center gap-2 mb-3 bg-black/70 backdrop-blur-xl px-4 py-2 rounded-full border border-amber-800/60 shadow-[0_0_25px_rgba(251,191,36,0.15)]">
-                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-amber-500/80 shadow-lg bg-amber-900/20">
-                      <Image 
-                        src="/insta.jpg" 
-                        alt="Avatar" 
-                        width={32} 
-                        height={32} 
-                        className="object-cover" 
-                        loading="lazy"
-                        quality={75}
-                      />
-                </div>
-                <span className="text-sm font-bold text-amber-50 tracking-wide">iimaan_akhmedovna</span>
+          <div className="flex items-center gap-2 mb-3 bg-black/70 backdrop-blur-xl px-4 py-2 rounded-full border border-amber-800/60 shadow-[0_0_25px_rgba(251,191,36,0.15)]">
+            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-amber-500/80 shadow-lg bg-amber-900/20">
+              <Image src="/insta.jpg" alt="Avatar" width={32} height={32} className="object-cover" loading="lazy" quality={75} />
             </div>
+            <span className="text-sm font-bold text-amber-50 tracking-wide">iimaan_akhmedovna</span>
+          </div>
 
-            {/* Sarlavha */}
-            <h1 className="text-[68px] leading-[0.85] md:text-[96px] font-[900] uppercase tracking-[-0.02em] mb-2 text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-300 to-amber-500 drop-shadow-[0_4px_20px_rgba(255,193,7,0.4)]">
-                HUZUR
-            </h1>
+          <h1 className="text-[68px] leading-[0.85] md:text-[96px] font-[900] uppercase tracking-[-0.02em] mb-2 text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-300 to-amber-500 drop-shadow-[0_4px_20px_rgba(255,193,7,0.4)]">
+            HUZUR
+          </h1>
 
-            {/* Tavsif */}
-            <p className="text-[15px] md:text-lg leading-relaxed mb-4 text-gray-300 max-w-md font-medium px-4">
-                Qanday qilib muammolardan halos bo'lib, orzu va maqsadlarga 8 ta yo'l orqali <span className="text-amber-300 font-extrabold">TEZ</span> va <span className="text-amber-300 font-extrabold">OSON</span> yetish mumkin?
-            </p>
+          <p className="text-[15px] md:text-lg leading-relaxed mb-4 text-gray-300 max-w-md font-medium px-4">
+            Qanday qilib muammolardan halos bo'lib, orzu va maqsadlarga 8 ta yo'l orqali{' '}
+            <span className="text-amber-300 font-extrabold">TEZ</span> va{' '}
+            <span className="text-amber-300 font-extrabold">OSON</span> yetish mumkin?
+          </p>
 
-            {/* Asosiy rasm */}
-            <div className="relative w-full max-w-[550px] h-[650px] -mt-26 -mb-20 z-10 group">
-              
-              <div 
-                className="absolute inset-0 z-20"
-                style={{
-                  maskImage: 'radial-gradient(circle at 50% 40%, black 30%, transparent 85%)',
-                  WebkitMaskImage: 'radial-gradient(circle at 50% 40%, black 30%, transparent 85%)'
-                }}
-              >
-                <Image 
-                  src="/logo2.png"
-                  alt="Iman Akhmedovna"
-                  fill
-                  sizes="(max-width: 768px) 550px, 550px"
-                  className="object-contain object-top"
-                  priority
-                  quality={85}
-                />
-              </div>
-
-              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-30" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-amber-600/10 blur-[100px] rounded-full z-0 pointer-events-none" />
+          <div className="relative w-full max-w-[550px] h-[650px] -mt-26 -mb-20 z-10 group">
+            <div className="absolute inset-0 z-20" style={{
+              maskImage: 'radial-gradient(circle at 50% 40%, black 30%, transparent 85%)',
+              WebkitMaskImage: 'radial-gradient(circle at 50% 40%, black 30%, transparent 85%)'
+            }}>
+              <Image src="/logo2.png" alt="Iman Akhmedovna" fill sizes="(max-width: 768px) 550px, 550px" className="object-contain object-top" priority quality={85} />
             </div>
+            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-30" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-amber-600/10 blur-[100px] rounded-full z-0 pointer-events-none" />
+          </div>
 
-            {/* Tugma */}
-            <div className="w-full px-4 -mt-12 relative z-40 flex flex-col items-center">
-                <GoldButton onClick={() => setIsModalOpen(true)} />
-                
-                <div className="relative mt-3 flex items-center justify-center">
-                    <p className="text-amber-300/90 text-[13px] font-semibold tracking-widest uppercase">
-                        Kursga oldindan ro'yxatdan o'ting
-                    </p>
-                </div>
+          <div className="w-full px-4 -mt-12 relative z-40 flex flex-col items-center">
+            <GoldButton onClick={() => setIsModalOpen(true)} />
+            <div className="relative mt-3 flex items-center justify-center">
+              <p className="text-amber-300/90 text-[13px] font-semibold tracking-widest uppercase">
+                Kursga oldindan ro'yxatdan o'ting
+              </p>
             </div>
+          </div>
         </div>
       </section>
 
       {/* SECTION 2 */}
       <section className="relative py-16 -mt-12 px-4 z-10">
         <div className="max-w-md mx-auto">
-            <h2 className="text-[32px] font-[900] text-center mb-10 leading-[1.1] tracking-tight">
-                Ro'yxatdan o'tish <br/>
-                orqali <span className="text-[#FF3B30] drop-shadow-[0_0_10px_rgba(255,59,48,0.4)]">qo'lga kiritasiz:</span>
-            </h2>
+          <h2 className="text-[32px] font-[900] text-center mb-10 leading-[1.1] tracking-tight">
+            Ro'yxatdan o'tish <br/>
+            orqali <span className="text-[#FF3B30] drop-shadow-[0_0_10px_rgba(255,59,48,0.4)]">qo'lga kiritasiz:</span>
+          </h2>
 
-            <div className="space-y-6">
-                {/* KARTA 1 */}
-                <div className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                    <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
-                          <Image 
-                            src="/royhat.webp" 
-                            alt="Kurs dasturi" 
-                            fill 
-                            className="object-contain" 
-                            loading="lazy"
-                            quality={75}
-                            sizes="(max-width: 768px) 100vw, 400px"
-                          />
-                    </div>
-                    <h3 className="text-[#1A1100] font-[800] text-[18px] leading-tight px-4">
-                        Kurs dasturi <br/> va batafsil ma'lumotlar
-                    </h3>
+          <div className="space-y-6">
+            {[
+              { img: '/royhat.webp', alt: 'Kurs dasturi', title: "Kurs dasturi \n va batafsil ma'lumotlar" },
+              { img: '/chegirma.jpg', alt: 'Arzon narx', title: "Eng arzon narxda \n kursga qo'shilish" },
+              { img: '/problem.png', alt: 'Muammo', title: "Istalgan muammodan 8 ta qadam orqali tez va oson chiqib ketish yo'llarini o'rganasiz" },
+              { img: '/line.webp', alt: 'Qo\'llanma', title: "Qarz, kreditlardan chiqish, orzu maqsadlarga erishish, ibodatlarda mustahkam bo'lish va duolar ijobati uchun qo'llanma va materiallar" },
+              { img: '/bonus.webp', alt: 'Bonus', title: "Hech qayerda berilmagan sirli bonuslar (sizga yoqishi aniq)" },
+            ].map((card, index) => (
+              <div key={index} className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
+                  <Image src={card.img} alt={card.alt} fill className="object-contain" loading="lazy" quality={75} sizes="(max-width: 768px) 100vw, 400px" />
                 </div>
-
-                {/* KARTA 2 */}
-                <div className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                    <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
-                          <Image 
-                            src="/chegirma.jpg" 
-                            alt="Arzon narx" 
-                            fill 
-                            className="object-contain" 
-                            loading="lazy"
-                            quality={75}
-                            sizes="(max-width: 768px) 100vw, 400px"
-                          />
-                    </div>
-                    <h3 className="text-[#1A1100] font-[600] text-[18px] leading-tight px-4">
-                        Eng arzon narxda <br/> kursga qo'shilish
-                    </h3>
-                </div>
-
-                {/* KARTA 3 */}
-                <div className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                    <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
-                          <Image 
-                            src="/problem.png" 
-                            alt="Xotira" 
-                            fill 
-                            className="object-contain" 
-                            loading="lazy"
-                            quality={75}
-                            sizes="(max-width: 768px) 100vw, 400px"
-                          />
-                    </div>
-                    <h3 className="text-[#1A1100] font-[600] text-[18px] leading-tight px-4">
-                       Istalgan muammodan 8 ta qadam orqali tez va oson chiqib ketish yo'llarini o'rganasiz
-                    </h3>
-                </div>
-
-                {/* KARTA 4 */}
-                <div className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                    <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
-                          <Image 
-                            src="/line.webp" 
-                            alt="Xotira" 
-                            fill 
-                            className="object-contain" 
-                            loading="lazy"
-                            quality={75}
-                            sizes="(max-width: 768px) 100vw, 400px"
-                          />
-                    </div>
-                    <h3 className="text-[#1A1100] font-[600] text-[18px] leading-tight px-4">
-                       Qarz, kreditlardan chiqish, orzu maqsadlarga erishish, ibodatlarda mustahkam bo'lish va duolar ijobati uchun qo'llanma va materiallar
-                    </h3>
-                </div>
-
-                {/* KARTA 5 */}
-                <div className="bg-gradient-to-br from-white to-gray-100 rounded-[32px] p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                    <div className="h-[140px] w-full relative mb-4 flex items-center justify-center bg-gray-100">
-                          <Image 
-                            src="/bonus.webp" 
-                            alt="Xotira" 
-                            fill 
-                            className="object-contain" 
-                            loading="lazy"
-                            quality={75}
-                            sizes="(max-width: 768px) 100vw, 400px"
-                          />
-                    </div>
-                    <h3 className="text-[#1A1100] font-[600] text-[18px] leading-tight px-4">
-                       Hech qayerda berilmagan sirli bonuslar (sizga yoqishi aniq)
-                    </h3>
-                </div>
-            </div>
+                <h3 className="text-[#1A1100] font-[700] text-[18px] leading-tight px-4">
+                  {card.title}
+                </h3>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* SECTION 3: MENTOR */}
       <section className="relative pt-10 pb-16 -mt-12 px-4 z-10">
         <div className="max-w-md mx-auto flex flex-col items-center">
-            
-            <h2 className="text-[36px] font-[900] text-white tracking-tighter mb-8 text-center leading-none">
-                Iman Akhmedovna
-            </h2>
+          <h2 className="text-[36px] font-[900] text-white tracking-tighter mb-8 text-center leading-none">
+            Iman Akhmedovna
+          </h2>
 
-            {/* Yutuqlar */}
-            <div className="w-full space-y-0 mb-10">
-                {[
-                    "O'quvchilarni eng tez va oson natijaga olib chiqish bo'yicha Uzbekistonda yagona ekspert",
-                    "Oliy ma'lumotli psixolog, O'zbekiston respublikasi 30 yillik ko'krak nishoni sohibasi",
-                    "Filologiya fanlari PhD mustaqil izlanuvchisi, 3-darajali yurist.",
-                    "Insonlar ichki hissiyotlari, ong osti dasturlari bilan ishlovchi mentor",
-                    "3 yil ichida 80.000 + o'quvchilarimga ong osti dasturlarini to'g'irlash orqali muammolarida tez va oson chiqishlariga yordam berdim"
-                ].map((item, index) => (
-                    <div key={index} className="w-full border border-[#D4AF37]/30 rounded-[20px] py-3 px-0 text-center bg-gradient-to-b from-[#111] to-[#0a0a0a]">
-                        <p className="text-gray-200 font-[400] text-[14px] leading-[1]">
-                            {item}
-                        </p>
-                    </div>
-                ))}
+          <div className="w-full space-y-0 mb-10">
+            {[
+              "O'quvchilarni eng tez va oson natijaga olib chiqish bo'yicha Uzbekistonda yagona ekspert",
+              "Oliy ma'lumotli psixolog, O'zbekiston respublikasi 30 yillik ko'krak nishoni sohibasi",
+              "Filologiya fanlari PhD mustaqil izlanuvchisi, 3-darajali yurist.",
+              "Insonlar ichki hissiyotlari, ong osti dasturlari bilan ishlovchi mentor",
+              "3 yil ichida 80.000 + o'quvchilarimga ong osti dasturlarini to'g'irlash orqali muammolarida tez va oson chiqishlariga yordam berdim"
+            ].map((item, index) => (
+              <div key={index} className="w-full border border-[#D4AF37]/30 rounded-[20px] py-3 px-0 text-center bg-gradient-to-b from-[#111] to-[#0a0a0a]">
+                <p className="text-gray-200 font-[400] text-[14px] leading-[1]">{item}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="relative -mt-10 w-full max-w-[900px] aspect-square mb-8 rounded-b-3xl overflow-hidden bg-[#0a0a0a]">
+            <Image src="/iman.png" alt="Iman Akhmedovna" fill sizes="(max-width: 768px) 100vw, 900px" className="object-cover w-full h-full object-top" loading="lazy" quality={80} />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-10" />
+          </div>
+
+          <div className="w-full px-4 -mt-10 relative z-30 flex flex-col items-center">
+            <GoldButton onClick={() => setIsModalOpen(true)} />
+            <div className="relative mt-4 flex items-center justify-center">
+              <p className="text-amber-200/80 text-sm font-medium tracking-wider uppercase">
+                Kursga oldindan ro'yxatdan o'ting
+              </p>
             </div>
-
-            {/* Pastki rasm */}
-            <div className="relative -mt-10 w-full max-w-[900px] aspect-square mb-8 rounded-b-3xl overflow-hidden bg-[#0a0a0a]">
-                 <Image
-                    src="/iman.png"
-                    alt="Iman Akhmedovna"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 900px"
-                    className="object-cover w-full h-full object-top"
-                    loading="lazy"
-                    quality={80}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-10" />
-            </div>
-
-            <div className="w-full px-4 -mt-10 relative z-30 flex flex-col items-center">
-                <GoldButton onClick={() => setIsModalOpen(true)} />
-                <div className="relative mt-4 flex items-center justify-center">
-                    <p className="text-amber-200/80 text-sm font-medium tracking-wider uppercase">Kursga oldindan ro'yxatdan o'ting</p>
-                </div>
-            </div>
-
+          </div>
         </div>
       </section>
 
@@ -485,7 +339,6 @@ const SupermiyaLanding = () => {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Ism familiya */}
               <input
                 ref={nameInputRef}
                 type="text"
@@ -496,17 +349,12 @@ const SupermiyaLanding = () => {
                 placeholder="Ismingizni kiriting"
                 disabled={isLoading}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    focusPhoneInput()
-                  }
+                  if (e.key === 'Enter') { e.preventDefault(); focusPhoneInput() }
                 }}
               />
 
-              {/* Telefon raqami */}
               <div className="relative">
                 <div className="flex gap-2">
-                  {/* Mamlakat tanlovi */}
                   <div className="relative w-1/3">
                     <button
                       type="button"
@@ -522,22 +370,14 @@ const SupermiyaLanding = () => {
                     
                     {isCountryDropdownOpen && (
                       <>
-                        <div 
-                          className="fixed inset-0 z-10" 
-                          onClick={() => {
-                            setIsCountryDropdownOpen(false)
-                            focusPhoneInput()
-                          }}
-                        />
+                        <div className="fixed inset-0 z-10" onClick={() => { setIsCountryDropdownOpen(false); focusPhoneInput() }} />
                         <div className="country-dropdown absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-[#1E1E1E] border border-[#333] rounded-[16px] z-20 shadow-lg">
                           {COUNTRIES.map((country) => (
                             <button
                               key={country.code}
                               type="button"
                               onClick={() => handleCountryChange(country.code)}
-                              className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-[#2A2A2A] transition-colors ${
-                                formData.country_code === country.code ? 'bg-[#FFB800]/20' : ''
-                              }`}
+                              className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-[#2A2A2A] transition-colors ${formData.country_code === country.code ? 'bg-[#FFB800]/20' : ''}`}
                             >
                               <span className="text-lg">{country.flag}</span>
                               <div className="flex flex-col items-start">
@@ -551,7 +391,6 @@ const SupermiyaLanding = () => {
                     )}
                   </div>
                   
-                  {/* Telefon raqami inputi */}
                   <div className="flex-1">
                     <input
                       ref={phoneInputRef}
@@ -565,10 +404,7 @@ const SupermiyaLanding = () => {
                       placeholder="Raqamingiz"
                       disabled={isLoading}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          handleSubmit(e as unknown as React.FormEvent)
-                        }
+                        if (e.key === 'Enter') { e.preventDefault(); handleSubmit(e as unknown as React.FormEvent) }
                       }}
                       onFocus={(e) => {
                         const len = e.target.value.length
@@ -582,7 +418,7 @@ const SupermiyaLanding = () => {
               <div className="pt-4">
                 <GoldButton 
                   onClick={() => {}} 
-                  text={isLoading ? "Telegramga o'tilmoqda..." : "Tasdiqlash"} 
+                  text={isLoading ? "Yuborilmoqda..." : "Tasdiqlash"} 
                   disabled={isLoading}
                 />
               </div>
